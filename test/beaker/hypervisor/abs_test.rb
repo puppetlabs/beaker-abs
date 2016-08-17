@@ -2,8 +2,6 @@ require 'test_helper'
 require 'beaker/hypervisor/abs'
 
 describe 'Beaker::Hypervisor::Abs' do
-  # need to verify that hypervisor => 'abs' maps to us
-
   describe 'when provisioning' do
     it 'sets vmhostname for a single host' do
       host_hash = {
@@ -12,34 +10,34 @@ describe 'Beaker::Hypervisor::Abs' do
         'template'   => 'redhat-7-x86_64',
         'roles'      => [ 'agent' ]
       }
-      abs_data = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
-                   'type'     => host_hash['template'],
-                   'engine'   => 'vmpooler'}]
+      resource_hosts = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
+                         'type'     => host_hash['template'],
+                         'engine'   => 'vmpooler'}]
 
       host = Beaker::Host.create('redhat7-64-1', host_hash, {})
-      abs = Beaker::Abs.new([host], {:abs_data => JSON.dump(abs_data)})
+      abs = Beaker::Abs.new([host], {:abs_resource_hosts => JSON.dump(resource_hosts)})
       abs.provision
 
       host['vmhostname'].must_equal('m2em9v7895hk7xg.delivery.puppetlabs.net')
     end
 
-    it 'sets vmhostname for multiple hosts of the same type' do
+    it 'sets vmhostname for multiple hosts of the same type preserving the order' do
       host_hash = {
         'hypervisor' => 'abs',
         'platform'   => 'el-7-x86_64',
         'template'   => 'redhat-7-x86_64',
         'roles'      => [ 'agent' ]
       }
-      abs_data = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
-                   'type'     => host_hash['template'],
-                   'engine'   => 'vmpooler'},
-                  {'hostname' => 'eb0zrfuwteq80t7.delivery.puppetlabs.net',
-                   'type'     => host_hash['template'],
-                   'engine'   => 'vmpooler'}]
+      resource_hosts = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
+                         'type'     => host_hash['template'],
+                         'engine'   => 'vmpooler'},
+                        {'hostname' => 'eb0zrfuwteq80t7.delivery.puppetlabs.net',
+                         'type'     => host_hash['template'],
+                         'engine'   => 'vmpooler'}]
 
       host1 = Beaker::Host.create('redhat7-64-1', host_hash, {})
-      host2 = Beaker::Host.create('redhat7-64-1', host_hash, {})
-      abs = Beaker::Abs.new([host1, host2], {:abs_data => JSON.dump(abs_data)})
+      host2 = Beaker::Host.create('redhat7-64-2', host_hash, {})
+      abs = Beaker::Abs.new([host1, host2], {:abs_resource_hosts => JSON.dump(resource_hosts)})
       abs.provision
 
       host1['vmhostname'].must_equal('m2em9v7895hk7xg.delivery.puppetlabs.net')
@@ -59,17 +57,16 @@ describe 'Beaker::Hypervisor::Abs' do
         'template'   => 'ubuntu-1404-x86_64',
         'roles'      => [ 'agent' ]
       }
-      abs_data = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
-                   'type'     => redhat_host_hash['template'],
-                   'engine'   => 'vmpooler'},
-                  {'hostname' => 'eb0zrfuwteq80t7.delivery.puppetlabs.net',
-                   'type'     => ubuntu_host_hash['template'],
-                   'engine'   => 'vmpooler'}]
-
+      resource_hosts = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
+                         'type'     => redhat_host_hash['template'],
+                         'engine'   => 'vmpooler'},
+                        {'hostname' => 'eb0zrfuwteq80t7.delivery.puppetlabs.net',
+                         'type'     => ubuntu_host_hash['template'],
+                         'engine'   => 'vmpooler'}]
 
       host1 = Beaker::Host.create('redhat7-64-1', redhat_host_hash, {})
       host2 = Beaker::Host.create('ubuntu1404-64-1', ubuntu_host_hash, {})
-      abs = Beaker::Abs.new([host1, host2], {:abs_data => JSON.dump(abs_data)})
+      abs = Beaker::Abs.new([host1, host2], {:abs_resource_hosts => JSON.dump(resource_hosts)})
       abs.provision
 
       host1['vmhostname'].must_equal('m2em9v7895hk7xg.delivery.puppetlabs.net')
@@ -83,17 +80,17 @@ describe 'Beaker::Hypervisor::Abs' do
         'template'   => 'redhat-7-x86_64',
         'roles'      => [ 'agent' ]
       }
-      abs_data = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
-                   'type'     => 'ubuntu-1404-x86_64',
-                   'engine'   => 'vmpooler'}]
+      resource_hosts = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
+                         'type'     => 'ubuntu-1404-x86_64',
+                         'engine'   => 'vmpooler'}]
 
       host = Beaker::Host.create('redhat7-64-1', host_hash, {})
-      abs = Beaker::Abs.new([host], {:abs_data => JSON.dump(abs_data)})
+      abs = Beaker::Abs.new([host], {:abs_resource_hosts => JSON.dump(resource_hosts)})
 
       err = assert_raises(ArgumentError) do
         abs.provision
       end
-      err.message.must_match("Unable to provision host with template 'redhat-7-x86_64'")
+      err.message.must_match("Failed to provision host 'redhat7-64-1', no template of type 'redhat-7-x86_64' was provided.")
     end
 
     it 'prefers abs_data as an ENV variable' do
@@ -103,20 +100,20 @@ describe 'Beaker::Hypervisor::Abs' do
         'template'   => 'redhat-7-x86_64',
         'roles'      => [ 'agent' ]
       }
-      default_abs_data = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
-                           'type'     => 'ubuntu-1404-x86_64',
-                           'engine'   => 'vmpooler'}]
-      overridden_abs_data = [{'hostname' => 'eb0zrfuwteq80t7.delivery.puppetlabs.net',
-                              'type'     => 'redhat-7-x86_64',
-                              'engine'   => 'vmpooler'}]
+      default_resource_hosts = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
+                                 'type'     => 'ubuntu-1404-x86_64',
+                                 'engine'   => 'vmpooler'}]
+      overridden_resource_hosts = [{'hostname' => 'eb0zrfuwteq80t7.delivery.puppetlabs.net',
+                                    'type'     => 'redhat-7-x86_64',
+                                    'engine'   => 'vmpooler'}]
 
-      ENV['ABS_DATA'] = JSON.dump(overridden_abs_data)
+      ENV['ABS_RESOURCE_HOSTS'] = JSON.dump(overridden_resource_hosts)
       begin
         host = Beaker::Host.create('redhat7-64-1', host_hash, {})
-        abs = Beaker::Abs.new([host], {:abs_data => JSON.dump(default_abs_data)})
+        abs = Beaker::Abs.new([host], {:abs_resource_hosts => JSON.dump(default_resource_hosts)})
         abs.provision
       ensure
-        ENV['ABS_DATA'] = nil
+        ENV['ABS_RESOURCE_HOSTS'] = nil
       end
 
       host['vmhostname'].must_equal('eb0zrfuwteq80t7.delivery.puppetlabs.net')

@@ -30,7 +30,11 @@ module Beaker
 
       # for each host, get a vm for that template type
       @hosts.each do |host|
-        if provisioned_hosts = type2hosts[host['template']]
+        template = host['template']
+
+        raise ArgumentError.new("Failed to provision host '#{host.hostname}' because its 'template' is missing.") if template.nil?
+
+        if provisioned_hosts = type2hosts[template]
           host['vmhostname'] = provisioned_hosts.shift
         else
           raise ArgumentError.new("Failed to provision host '#{host.hostname}', no template of type '#{host['template']}' was provided.")

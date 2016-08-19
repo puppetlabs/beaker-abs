@@ -105,6 +105,24 @@ describe 'Beaker::Hypervisor::Abs' do
       err.message.must_match("Failed to provision host 'redhat7-64-1', no template of type 'redhat-7-x86_64' was provided.")
     end
 
+    it 'raises when the host is missing its template' do
+      host_hash = {
+        'redhat7-64-1' => {
+          'hypervisor' => 'abs',
+          'platform'   => 'el-7-x86_64',
+          'roles'      => [ 'agent' ]
+        }
+      }
+      resource_hosts = [{'hostname' => 'eb0zrfuwteq80t7.delivery.puppetlabs.net',
+                                    'type'     => 'redhat-7-x86_64',
+                                    'engine'   => 'vmpooler'}]
+
+      err = assert_raises(ArgumentError) do
+        provision_hosts(host_hash, resource_hosts)
+      end
+      err.message.must_match("Failed to provision host 'redhat7-64-1' because its 'template' is missing.")
+    end
+
     it 'prefers abs_data as an ENV variable' do
       host_hash = {
         'redhat7-64-1' => {

@@ -21,8 +21,8 @@ Or install it yourself as:
 ## Usage
 
 Create a beaker host config with `hypervisor: abs`, and pass the data from the
-AlwaysBeScheduling service in the `ABS_DATA` environment variable. For example,
-given a host config:
+AlwaysBeScheduling service in the `ABS_RESOURCE_HOSTS` environment variable to
+the beaker ABS hypervisor. For example, given a host config:
 
 ```yaml
 ---
@@ -38,7 +38,7 @@ HOSTS:
 Run beaker as:
 
 ```
-env ABS_DATA=<data> beaker --hosts hosts.yaml
+env ABS_RESOURCE_HOSTS=<data> beaker --hosts hosts.yaml
 ```
 
 Beaker will populate the `vmhostname` property for each host using information provided by the AlwaysBeScheduling service.

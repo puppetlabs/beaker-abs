@@ -6,8 +6,8 @@ require 'beaker-abs'
 Gem::Specification.new do |spec|
   spec.name          = "beaker-abs"
   spec.version       = BeakerAbs::VERSION
-  spec.authors       = ["Josh Cooper"]
-  spec.email         = ["josh@puppet.com"]
+  spec.authors       = ["Josh Cooper", "Rick Bradley"]
+  spec.email         = ["josh@puppet.com", "rick@puppet.com"]
 
   spec.summary       = %q{Let's test Puppet, using hosts provisioned by Always Be Scheduling service.}
   spec.description   = %q{Adds a custom hypervisor that uses hosts provisioned by the Always Be Scheduling service.}

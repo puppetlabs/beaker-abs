@@ -5,7 +5,7 @@ require 'beaker-abs'
 
 Gem::Specification.new do |spec|
   spec.name          = "beaker-abs"
-  spec.version       = BeakerAbs::VERSION
+  spec.version       = BeakerAbs::Version::STRING
   spec.authors       = ["Josh Cooper", "Rick Bradley"]
   spec.email         = ["josh@puppet.com", "rick@puppet.com"]
 

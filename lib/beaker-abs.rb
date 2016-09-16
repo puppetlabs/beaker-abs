@@ -1,3 +1,4 @@
+require 'beaker-abs/version'
+
 module BeakerAbs
-  VERSION = "0.1.0"
 end

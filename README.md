@@ -47,7 +47,14 @@ Beaker will populate the `vmhostname` property for each host using information p
 
 After checking out the repo, run `bundle install --path .bundle` to install dependencies. Then, run `bundle exec rake test` to run the tests.
 
-To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To release a new version, run the [release pipeline](https://jenkins-qe.delivery.puppetlabs.net/job/qe_beaker-abs_init-multijob_master/) 
+(infrastructure access is required) and provide the following parameters:
+
+- PUBLIC: Whether to release the gem to rubygems.org
+- version: Desired version to release
+
+The pipeline will update the version number in `version.rb`, create a git tag for the version, push git commits and tags to
+GitHub, and optionally push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 

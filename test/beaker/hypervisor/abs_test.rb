@@ -16,6 +16,10 @@ describe 'Beaker::Hypervisor::Abs' do
     }
   end
 
+  before :each do
+    ENV['ABS_RESOURCE_HOSTS'] = nil
+  end
+
   def provision_hosts(host_hashes, resource_hosts, options = {})
     hosts = []
 

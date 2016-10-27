@@ -58,7 +58,7 @@ module Beaker
 
       type2hosts.each_pair do |_, resource_hosts|
         if host = resource_hosts.first
-          raise ArgumentError.new("unexpected host '#{host['hostname']}' of type '#{host['type']}' was provided")
+          raise ArgumentError.new("Unexpected host '#{host['hostname']}' of type '#{host['type']}' was provided")
         end
       end
     end
@@ -82,13 +82,15 @@ module Beaker
         response = http.request(request)
         parsed_response = JSON.parse(response.body)
 
-        unless parsed_response['ok']
+        if parsed_response['ok']
+          @logger.notify "Tagged host '#{h['vmhostname']}'"
+        else
           @logger.notify "Failed to tag host '#{h['vmhostname']}'!"
         end
       rescue JSON::ParserError => e
-        @logger.notify "Failed to tag host '#{h['vmhostname']}'! (failed with #{e.class})"
+        @logger.notify "Failed to tag host '#{h['vmhostname']}'!: #{e.inspect}"
       rescue => e
-        @logger.notify "Failed to connect to vmpooler for tagging!: #{e.inspect}"
+        @logger.notify "Failed to connect to vmpooler to tag host '#{h['vmhostname']}'!: #{e.inspect}"
       end
     end
 

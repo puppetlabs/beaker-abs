@@ -3,8 +3,12 @@ require 'test_helper'
 require 'beaker/hypervisor/abs'
 
 describe 'Beaker::Hypervisor::Abs' do
+  let(:buffer) do
+    StringIO.new
+  end
+
   let(:logger) do
-    create_logger(StringIO.new) # Set to STDOUT for debugging
+    create_logger(buffer) # Set to STDOUT for debugging
   end
 
   let(:global_options) do
@@ -357,7 +361,7 @@ describe 'Beaker::Hypervisor::Abs' do
       err = assert_raises(ArgumentError) do
         provision_hosts(host_hashes, resource_hosts)
       end
-      err.message.must_match(/unexpected host 'eb0zrfuwteq80t7.delivery.puppetlabs.net' of type 'ubuntu-1404-x86_64' was provided/)
+      err.message.must_match(/Unexpected host 'eb0zrfuwteq80t7.delivery.puppetlabs.net' of type 'ubuntu-1404-x86_64' was provided/)
 
       assert_requested(:put, "http://vmpooler.example.com/vm/m2em9v7895hk7xg")
     end
@@ -411,6 +415,63 @@ describe 'Beaker::Hypervisor::Abs' do
       provision_hosts(host_hashes, resource_hosts)
 
       assert_requested(:put, "http://vmpooler.example.com/vm/m2em9v7895hk7xg")
+    end
+
+    describe "when logging" do
+      let(:hostname) { 'm2em9v7895hk7xg' }
+      let(:fqdn)     { "#{hostname}.delivery.puppetlabs.net" }
+
+      def provision_single_host(name)
+        host_hashes = {
+          'redhat7-64-1' => {
+            'hypervisor' => 'abs',
+            'platform'   => 'el-7-x86_64',
+            'template'   => 'redhat-7-x86_64',
+            'roles'      => [ 'master' ]
+          }
+        }
+        resource_hosts = [{'hostname' => name,
+                           'type'     => 'redhat-7-x86_64',
+                           'engine'   => 'vmpooler'}]
+
+        provision_hosts(host_hashes, resource_hosts)
+      end
+
+      it 'logs when it tags a host' do
+        stub_request(:put, "http://vmpooler.example.com/vm/#{hostname}").
+          to_return(:status => 200, :body => "{\"ok\": true}")
+
+        provision_single_host(fqdn)
+
+        buffer.string.must_equal("Tagged host '#{fqdn}'\n")
+      end
+
+      it 'logs if the response is not ok' do
+        stub_request(:put, "http://vmpooler.example.com/vm/#{hostname}").
+          to_return(:status => 200, :body => "{\"ok\": false}")
+
+        provision_single_host(fqdn)
+
+        buffer.string.must_equal("Failed to tag host '#{fqdn}'!\n")
+      end
+
+      it 'logs if the response is invalid json' do
+        stub_request(:put, "http://vmpooler.example.com/vm/#{hostname}").
+          to_return(:status => 200, :body => "{ this invalid json }")
+
+        provision_single_host(fqdn)
+
+        buffer.string.must_match(/Failed to tag host '#{fqdn}'!: .*JSON::ParserError.* unexpected token at '{ this invalid json }'/)
+      end
+
+      it 'logs if it cannot connect to the vmpooler' do
+        stub_request(:put, "http://vmpooler.example.com/vm/#{hostname}").
+          to_raise(Errno::ECONNREFUSED)
+
+        provision_single_host(fqdn)
+
+        buffer.string.must_match(/Failed to connect to vmpooler to tag host '#{fqdn}'!: .*Errno::ECONNREFUSED: Connection refused/)
+      end
     end
   end
 end

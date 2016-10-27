@@ -93,6 +93,8 @@ module Beaker
     end
 
     def add_tags(host)
+      # All of these tags except for 'cinext' are copied from
+      # beaker's vmpooler hypervisor.
       (host[:host_tags] || {}).merge(
         'beaker_version'    => Beaker::Version::STRING,
         'jenkins_build_url' => @options[:jenkins_build_url],

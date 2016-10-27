@@ -38,8 +38,11 @@ module Beaker
         end
 
         if provisioned_hosts = type2hosts[template]
-          host['vmhostname'] = provisioned_hosts.shift['hostname']
-          tag(host)
+          resource_host = provisioned_hosts.shift
+          host['vmhostname'] = resource_host['hostname']
+          if resource_host['engine'] == 'vmpooler'
+            tag(host)
+          end
         else
           missing_hosts << host
         end

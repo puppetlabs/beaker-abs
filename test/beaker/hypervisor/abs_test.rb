@@ -382,5 +382,35 @@ describe 'Beaker::Hypervisor::Abs' do
 
       assert_requested(:put, "http://myothervmpooler.example.com/vm/m2em9v7895hk7xg")
     end
+
+    it "only tags resources whose engine is 'vmpooler'" do
+      stub_request(:put, "http://vmpooler.example.com/vm/m2em9v7895hk7xg").
+        to_return(:status => 200, :body => "{\"ok\": true}")
+
+      host_hashes = {
+        'redhat7-64-1' => {
+          'hypervisor' => 'abs',
+          'platform'   => 'el-7-x86_64',
+          'template'   => 'redhat-7-x86_64',
+          'roles'      => [ 'master' ]
+        },
+        'aix71-ppc-1' => {
+          'hypervisor' => 'abs',
+          'platform'   => 'aix-7.1-ppc',
+          'template'   => 'aix-71-ppc',
+          'roles'      => [ 'agent' ]
+        }
+      }
+      resource_hosts = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
+                         'type'     => 'redhat-7-x86_64',
+                         'engine'   => 'vmpooler'},
+                        {'hostname' => 'eb0zrfuwteq80t7.delivery.puppetlabs.net',
+                         'type'     => 'aix-71-ppc',
+                         'engine'   => 'hardware'}]
+
+      provision_hosts(host_hashes, resource_hosts)
+
+      assert_requested(:put, "http://vmpooler.example.com/vm/m2em9v7895hk7xg")
+    end
   end
 end

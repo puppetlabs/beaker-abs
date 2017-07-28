@@ -15,6 +15,57 @@ describe 'Beaker::Hypervisor::Abs' do
     hosts
   end
 
+  describe 'when setting ssh connection methods preference' do
+    it 'sets the right connection method preference when engine is vmpooler or nspooler' do
+      host_hash = {
+        'redhat7-64-1' => {
+          'hypervisor'                 => 'abs',
+          'platform'                   => 'el-7-x86_64',
+          'template'                   => 'redhat-7-x86_64',
+          'roles'                      => [ 'agent' ],
+          'ssh_connection_preference' => ['ip', 'vmhostname', 'hostname']
+        },
+        'ubuntu1404-64-1' => {
+          'hypervisor' => 'abs',
+          'platform'   => 'ubuntu-14.04-amd64',
+          'template'   => 'ubuntu-1404-x86_64',
+          'roles'      => [ 'agent' ],
+          'ssh_connection_preference' => ['ip', 'vmhostname', 'hostname']
+        }
+      }
+      resource_hosts = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
+                         'type'     => 'redhat-7-x86_64',
+                         'engine'   => 'vmpooler'},
+                        {'hostname' => 'eb0zrfuwteq80t7.delivery.puppetlabs.net',
+                         'type'     => 'ubuntu-1404-x86_64',
+                         'engine'   => 'nspooler'}]
+      hosts = provision_hosts(host_hash, resource_hosts)
+
+      hosts.length.must_equal(2)
+      hosts[0]['ssh_connection_preference'].must_equal(['vmhostname', 'hostname', 'ip'])
+      hosts[1]['ssh_connection_preference'].must_equal(['vmhostname', 'hostname', 'ip'])
+    end
+
+    it "uses default case when engine's preferred connection method is not specified" do
+      host_hash = {
+        'redhat7-64-1' => {
+          'hypervisor'                 => 'abs',
+          'platform'                   => 'el-7-x86_64',
+          'template'                   => 'redhat-7-x86_64',
+          'roles'                      => [ 'agent' ],
+          'ssh_connection_preference' => ['ip', 'vmhostname', 'hostname']
+        }
+      }
+      resource_hosts = [{'hostname' => 'm2em9v7895hk7xg.delivery.puppetlabs.net',
+                         'type'     => 'redhat-7-x86_64',
+                         'engine'   => 'my_custom_engine'}]
+
+      hosts = provision_hosts(host_hash, resource_hosts)
+      hosts[0]['ssh_connection_preference'].must_equal(['vmhostname', 'hostname', 'ip'])
+    end
+
+  end
+
   describe 'when provisioning' do
     it 'sets vmhostname for a single host' do
       host_hash = {

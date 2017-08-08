@@ -13,14 +13,38 @@ module Beaker
       @resource_hosts = JSON.parse(resource_hosts)
     end
 
+    def connection_preference(host)
+      vmhostname = host[:vmhostname]
+      if vmhostname && host[:hypervisor] == 'abs'
+        @resource_hosts.each do |resource_host|
+          if resource_host['hostname'] == vmhostname
+            engine = resource_host['engine']
+            case engine
+            when /^(vmpooler|nspooler)$/
+              # putting ip last as its not set by ABS
+              return [:vmhostname, :hostname, :ip]
+            else
+              super
+            end
+          end
+        end
+      end
+      super
+    end
+
     def provision
       type2hosts = {}
 
       # Each resource_host is of the form:
       # {
-      #   "hostname" => "1234567890",
+      #   "hostname" => "mkbx0m6dnnntgz1.delivery.puppetlabs.net",
       #   "type"     => "centos-7-i386",
       #   "engine"   => "vmpooler",
+      # }
+      # {
+      #   "hostname" => "sol10-1.delivery.puppetlabs.net",
+      #   "type"     => "solaris-10-sparc",
+      #   "engine"   => "nspooler",
       # }
       @resource_hosts.each do |resource_host|
         type = resource_host['type']
@@ -39,6 +63,9 @@ module Beaker
         else
           raise ArgumentError.new("Failed to provision host '#{host.hostname}', no template of type '#{host['template']}' was provided.")
         end
+      end
+      if Beaker::Hypervisor.respond_to?(:set_ssh_connection_preference)
+        Beaker::Hypervisor.set_ssh_connection_preference(@hosts, self)
       end
     end
 

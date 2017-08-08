@@ -149,5 +149,19 @@ describe 'Beaker::Hypervisor::Abs' do
       hosts.length.must_equal(1)
       hosts[0]['vmhostname'].must_equal('eb0zrfuwteq80t7.delivery.puppetlabs.net')
     end
+
+    it 'does not call set_ssh_connection_preference method if hypervisor does not responds' do
+      hypervisor_mock = MiniTest::Mock.new
+      1.times { hypervisor_mock.expect(:respond_to?, false, [:set_ssh_connection_preference]) }
+      provision_hosts({}, {})
+    end
+
+    it 'calls set_ssh_connection_preference method if beaker responds' do
+      hypervisor_mock = MiniTest::Mock.new
+      2.times { hypervisor_mock.expect(:respond_to?, true, [:set_ssh_connection_preference]) }
+      provision_hosts({}, {})
+    end
+
   end
+
 end

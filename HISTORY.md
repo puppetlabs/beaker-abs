@@ -1,12 +1,29 @@
 # qe_beaker-abs_bump_and_tag_master - History
 ## Tags
-* [LATEST - 24 Oct, 2016 (4c14d730)](#LATEST)
+* [LATEST - 14 Aug, 2017 (26840bd3)](#LATEST)
+* [0.2.0 - 24 Oct, 2016 (44ff3935)](#0.2.0)
 * [0.1.3 - 16 Sep, 2016 (6f1ced08)](#0.1.3)
 * [0.1.2 - 16 Sep, 2016 (b914ae60)](#0.1.2)
 * [0.1.1 - 16 Sep, 2016 (10ee39cf)](#0.1.1)
 
 ## Details
-### <a name = "LATEST">LATEST - 24 Oct, 2016 (4c14d730)
+### <a name = "LATEST">LATEST - 14 Aug, 2017 (26840bd3)
+
+* (GEM) update beaker-abs version to 0.3.0 (26840bd3)
+
+* Merge pull request #9 from rishijavia/BKR-1155-third_attempt (859cb1ec)
+
+
+```
+Merge pull request #9 from rishijavia/BKR-1155-third_attempt
+
+(BKR-1155) Override beaker's default ssh connection preference
+```
+* (BKR-1155) Override beaker's default ssh connection preference (8bab8a1c)
+
+### <a name = "0.2.0">0.2.0 - 24 Oct, 2016 (44ff3935)
+
+* (HISTORY) update beaker-abs history for gem release 0.2.0 (44ff3935)
 
 * (GEM) update beaker-abs version to 0.2.0 (4c14d730)
 

@@ -50,6 +50,7 @@ module Beaker
         type = resource_host['type']
         type2hosts[type] ||= []
         type2hosts[type] << resource_host['hostname']
+        type2hosts[type] << resource_host['ip']
       end
 
       # for each host, get a vm for that template type
@@ -60,6 +61,7 @@ module Beaker
 
         if provisioned_hosts = type2hosts[template]
           host['vmhostname'] = provisioned_hosts.shift
+          host['ip'] = provisioned_hosts.shift
         else
           raise ArgumentError.new("Failed to provision host '#{host.hostname}', no template of type '#{host['template']}' was provided.")
         end

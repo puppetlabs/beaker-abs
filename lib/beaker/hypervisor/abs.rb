@@ -21,8 +21,9 @@ module Beaker
             engine = resource_host['engine']
             case engine
             when /^(vmpooler|nspooler)$/
-              # putting ip last as its not set by ABS
-              return [:vmhostname, :hostname, :ip]
+              # ABS does not set ip, do not include
+              # vmpooler hostname is the platform name, nspooler hostname == vmhostname
+              return [:vmhostname]
             else
               super
             end

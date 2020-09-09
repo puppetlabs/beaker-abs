@@ -1,6 +1,9 @@
 require 'beaker'
 require 'json'
 require 'pry-byebug'
+require 'vmfloaty'
+require 'vmfloaty/conf'
+require 'vmfloaty/utils'
 
 module Beaker
   class Abs < Beaker::Hypervisor
@@ -79,18 +82,47 @@ module Beaker
     end
 
     def provision_vms(hosts)
-      ns_request, vm_request = generate_floaty_request_strings(hosts)
-      # TODO Implement ns_request
+
+      verbose = false
+      config = Conf.read_config # get the vmfloaty config fiel in home dir
+
+      # TODO: the options object provided by the floaty cli is required in get_service_config()
+      # we should make it optional or accept nil
+      cli = Object.new
+      def cli.service() "abs" end
+      def cli.priority() "1" end # forces going ahead of queue
+      def cli.url() nil end
+      def cli.token() nil end
+      def cli.user() nil end
+
+      # object with config from file, hash with keys user, url, token, priority
+      local_config = Utils.get_service_config(config, cli)
+      #the service object is the interfacte to all methods
+      abs_service = Service.new(nil, local_config)
+      supported_vm_list = abs_service.list(verbose)
+      supported_vm_list = supported_vm_list.reject { |e| e.empty? }
+      supported_vm_list = supported_vm_list.reject { |e| e.start_with?("*") }
+
+      vm_request = generate_floaty_request_strings(hosts, supported_vm_list)
+
 
       vm_beaker_abs = []
-      # HACKY NEED TO PROPERLY ACCESS VMFLOATY
       # Will return a JSON Object like this:
       # {"redhat-7-x86_64"=>["rich-apparition.delivery.puppetlabs.net", "despondent-side.delivery.puppetlabs.net"], "centos-7-x86_64"=>["firmer-vamp.delivery.puppetlabs.net"]}
-      vm_floaty_output = JSON.parse(`floaty --service=abs get #{vm_request} --json`)
+      os_types = Utils.generate_os_hash(vm_request.split)
+      vm_floaty_output = abs_service.retrieve(verbose, os_types)
 
-      vm_floaty_output.each do |os_platform, value|
+
+      raise ArgumentError.new("Timed out getting the ABS resources") if vm_floaty_output.nil?
+      vm_floaty_output_cleaned = Utils.standardize_hostnames(vm_floaty_output)
+      vm_floaty_output_cleaned.each do |os_platform, value|
+        # filter any extra key that does not have an Array value
+        if !value.is_a?(Array)
+          next
+        end
         value.each do | hostname |
-          vm_beaker_abs.push({"hostname": hostname, "type": os_platform, "engine":"vmpooler"})
+          # I don't think the engine is being used by the beaker-abs process
+          vm_beaker_abs.push({"hostname": hostname, "type": os_platform, "engine":"beaker-abs"})
         end
       end
 
@@ -99,43 +131,29 @@ module Beaker
       vm_beaker_abs
     end
 
-    # Based upon the host file, this method generates two strings for what we need to pass to floaty
-    # in order to generate nspooler and vmpooler requests
-    def generate_floaty_request_strings(hosts)
-      # Hopefully clean this up at some point?
-      # Use the vmfloaty gem methods directly to determine this?
-      # Need to swallow errors if person isn't setup to use nspooler, since most people wont need to
-      hacky_ns_list = `floaty list --service=ns`.split
-      hacky_vm_list = `floaty list --service=vmpooler`.split
-      ns_list = {}
+    # Based upon the host file, this method count the number of each template needed
+    # and generates the host=Xnum eg redhat-7-x86_64=2 expected by floaty
+    def generate_floaty_request_strings(hosts, supported_vm_list)
       vm_list = {}
+
       hosts.each do |host|
-        if hacky_vm_list.include?(host[:template])
+        if supported_vm_list.include?(host[:template])
           if vm_list.include?(host[:template])
             vm_list[host[:template]] = vm_list[host[:template]] + 1
           else
             vm_list[host[:template]] = 1
           end
-        elsif hacky_ns_list.include?(host[:template])
-          if ns_list.include?(host[:template])
-	    ns_list[host[:template]] = ns_list[host[:template]] + 1
-          else
-            ns_list[host[:template]] = 1
-          end
         else
           raise ArgumentError.new("#{host.name} has a template #{host[:template]} that is not found in vmpooler or nspooler")
         end
       end
+
       vm_request = ""
-      ns_request = ""
       vm_list.each do |key, value|
         vm_request.concat("#{key}=#{value} ")
       end
-      ns_list.each do |key, value|
-	ns_request.concat("#{key}=#{value} ")
-      end
 
-      return ns_request, vm_request
+      vm_request
     end
   end
 end

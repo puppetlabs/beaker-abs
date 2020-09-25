@@ -84,7 +84,7 @@ module Beaker
     def provision_vms(hosts)
 
       verbose = false
-      config = Conf.read_config # get the vmfloaty config fiel in home dir
+      config = Conf.read_config # get the vmfloaty config file in home dir
 
       # TODO: the options object provided by the floaty cli is required in get_service_config()
       # we should make it optional or accept nil
@@ -95,10 +95,8 @@ module Beaker
       def cli.token() nil end
       def cli.user() nil end
 
-      # object with config from file, hash with keys user, url, token, priority
-      local_config = Utils.get_service_config(config, cli)
       #the service object is the interfacte to all methods
-      abs_service = Service.new(nil, local_config)
+      abs_service = Service.new(cli, config)
       supported_vm_list = abs_service.list(verbose)
       supported_vm_list = supported_vm_list.reject { |e| e.empty? }
       supported_vm_list = supported_vm_list.reject { |e| e.start_with?("*") }
@@ -131,7 +129,7 @@ module Beaker
       vm_beaker_abs
     end
 
-    # Based upon the host file, this method count the number of each template needed
+    # Based upon the host file, this method counts the number of each template needed
     # and generates the host=Xnum eg redhat-7-x86_64=2 expected by floaty
     def generate_floaty_request_strings(hosts, supported_vm_list)
       vm_list = {}

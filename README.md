@@ -41,6 +41,15 @@ env ABS_RESOURCE_HOSTS=<data> beaker --hosts hosts.yaml
 ```
 
 Beaker will populate the `vmhostname` property for each host using information provided by the AlwaysBeScheduling service.
+This is typically used in a CI scenario, where the jenkins run-me-maybe plugin is populating the ABS_RESOURCE_HOSTS variable.
+
+### Using vmfloaty
+
+If you do not specify a ABS_RESOURCE_HOSTS and request to provision via the beaker options, beaker-abs will fallback to using
+your vmfloaty configuration. By default it will look for the service named 'abs'. The name can also be configured via 
+the environment variable ABS_SERVICE_NAME or the top level option in the hosts file abs_service_name. Similarly, the priority defaults to "1" which means
+it will take precedence over CI tests. Be careful not to run a CI test with this option. The priority can be configured via
+the environment variable ABS_SERVICE_PRIORITY or the top level option in the hosts file abs_service_priority.
 
 ## Development
 

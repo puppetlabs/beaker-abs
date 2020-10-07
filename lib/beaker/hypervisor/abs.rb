@@ -14,6 +14,9 @@ module Beaker
 
       resource_hosts = ENV['ABS_RESOURCE_HOSTS'] || @options[:abs_resource_hosts]
 
+      @abs_service_name = ENV['ABS_SERVICE_NAME'] || @options[:abs_service_name] || "abs"
+      @abs_service_priority = ENV['ABS_SERVICE_PRIORITY'] || @options[:abs_service_priority] || "1"
+
       raise ArgumentError.new("ABS_RESOURCE_HOSTS must be specified when using the Beaker::Abs hypervisor when provisioning") if resource_hosts.nil? && !options[:provision]
       resource_hosts = provision_vms(hosts).to_json if resource_hosts.nil?
       @resource_hosts = JSON.parse(resource_hosts)
@@ -89,8 +92,8 @@ module Beaker
       # TODO: the options object provided by the floaty cli is required in get_service_config()
       # we should make it optional or accept nil
       cli = Object.new
-      def cli.service() "abs" end
-      def cli.priority() "1" end # forces going ahead of queue
+      def cli.service() @abs_service_name end
+      def cli.priority() @abs_service_priority end # forces going ahead of queue
       def cli.url() nil end
       def cli.token() nil end
       def cli.user() nil end

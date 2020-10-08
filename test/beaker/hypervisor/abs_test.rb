@@ -1,5 +1,6 @@
-require 'test_helper'
+require 'test_helper' # THIS IS MINITEST
 require 'beaker/hypervisor/abs'
+require 'vmfloaty/utils'
 
 describe 'Beaker::Hypervisor::Abs' do
   def provision_hosts(host_hashes, resource_hosts)
@@ -15,7 +16,31 @@ describe 'Beaker::Hypervisor::Abs' do
     hosts
   end
 
-  describe 'when provisioning' do
+  describe 'when ABS_RESOURCE_HOSTS is not ready' do
+    it '#provision_vms works properly' do
+
+      host_hashes = {
+          'redhat7-64-1' => {
+              'hypervisor' => 'abs',
+              'platform'   => 'el-7-x86_64',
+              'template'   => 'redhat-7-x86_64',
+              'roles'      => [ 'agent' ]
+          }
+      }
+
+      hosts = []
+
+      host_hashes.each do |name, host_hash|
+        hosts << Beaker::Host.create(name, host_hash, {})
+      end
+
+      # TODO: this test queries the real floaty, needs stubs/mocks
+      # but the minitest does not like me so it's not working
+      # abs = Beaker::Abs.new(hosts, {:provision => true})
+      end
+    end
+
+    describe 'when provisioning' do
     it 'sets vmhostname for a single host' do
       host_hash = {
         'redhat7-64-1' => {

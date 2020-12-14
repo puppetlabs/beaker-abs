@@ -6,6 +6,17 @@ require 'vmfloaty/conf'
 require 'vmfloaty/utils'
 
 module Beaker
+  class Clifloaty
+    # the floaty service needs a 'cli' object that would normally represent the flags passed on the command line
+    # that object is then "merged" with the floaty config files to add/change options
+    # creating a dummy cli here
+    attr_reader :url, :token, :user, :service, :priority
+    def initialize(service, priority)
+      @service = service #the name of the service you want to use
+      @priority = priority
+    end
+  end
+  
   class Abs < Beaker::Hypervisor
     def initialize(hosts, options)
       @options = options
@@ -91,13 +102,7 @@ module Beaker
       config = Conf.read_config # get the vmfloaty config file in home dir
 
       # TODO: the options object provided by the floaty cli is required in get_service_config()
-      # we should make it optional or accept nil
-      cli = Object.new
-      def cli.service() @abs_service_name end
-      def cli.priority() @abs_service_priority end # forces going ahead of queue
-      def cli.url() nil end
-      def cli.token() nil end
-      def cli.user() nil end
+      cli = Clifloaty.new(@abs_service_name, @abs_service_priority)
 
       #the service object is the interfacte to all methods
       abs_service = Service.new(cli, config)

@@ -16,7 +16,7 @@ module Beaker
       @priority = priority
     end
   end
-  
+
   class Abs < Beaker::Hypervisor
     def initialize(hosts, options)
       @options = options

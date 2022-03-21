@@ -23,6 +23,18 @@ module Beaker
       @logger = options[:logger]
       @hosts = hosts
 
+      # set NET:SSH to use the ssh_config files if they exist
+      # beaker (upstream) defaults this settings to false
+      # NET:SSH documentation: set to true to load the default OpenSSH config files (~/.ssh/config, /etc/ssh_config), or to false to not load them,
+      # or to a file-name (or array of file-names) to load those specific configuration files. Defaults to true
+      if options[:ssh] && options[:ssh][:config] == false
+        options[:ssh][:config] = ENV['SSH_CONFIG_FILE'] || true
+        # code smell, replace existing host object (that's where NET::SSH gets the options, and the host has its own copy of the options!)
+        @hosts.each_with_index do |host, index|
+          @hosts[index] = Beaker::Host.create(host.name, host.host_hash, options)
+        end
+      end
+      
       resource_hosts = ENV['ABS_RESOURCE_HOSTS'] || @options[:abs_resource_hosts]
 
       @abs_service_name = ENV['ABS_SERVICE_NAME'] || @options[:abs_service_name] || "abs"

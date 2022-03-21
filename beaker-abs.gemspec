@@ -20,6 +20,9 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "beaker", "~> 4.0"
   spec.add_dependency "vmfloaty", ">= 1.0", "< 2"
+  # accept more keys, for smallstep integration
+  spec.add_dependency 'ed25519', ">= 1.2", "< 2.0"
+  spec.add_dependency 'bcrypt_pbkdf', ">= 1.0", "< 2.0"
   spec.add_development_dependency "bundler", "~> 2.1"
   spec.add_development_dependency "rake", "~> 13.0"
   spec.add_development_dependency "minitest", "~> 5.0"

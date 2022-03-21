@@ -56,8 +56,8 @@ describe 'Beaker::Hypervisor::Abs' do
 
       hosts = provision_hosts(host_hash, resource_hosts)
 
-      hosts.length.must_equal(1)
-      hosts[0]['vmhostname'].must_equal('m2em9v7895hk7xg.delivery.puppetlabs.net')
+      _(hosts.length).must_equal(1)
+      _(hosts[0]['vmhostname']).must_equal('m2em9v7895hk7xg.delivery.puppetlabs.net')
     end
 
     it 'sets vmhostname for multiple hosts of the same type preserving the order' do
@@ -77,9 +77,9 @@ describe 'Beaker::Hypervisor::Abs' do
       hosts = provision_hosts({'redhat7-64-1' => host_hash,
                                'redhat7-64-2' => host_hash.dup}, resource_hosts)
 
-      hosts.length.must_equal(2)
-      hosts[0]['vmhostname'].must_equal('m2em9v7895hk7xg.delivery.puppetlabs.net')
-      hosts[1]['vmhostname'].must_equal('eb0zrfuwteq80t7.delivery.puppetlabs.net')
+      _(hosts.length).must_equal(2)
+      _(hosts[0]['vmhostname']).must_equal('m2em9v7895hk7xg.delivery.puppetlabs.net')
+      _(hosts[1]['vmhostname']).must_equal('eb0zrfuwteq80t7.delivery.puppetlabs.net')
     end
 
     it 'sets vmhostname for multiple hosts of different types' do
@@ -106,9 +106,9 @@ describe 'Beaker::Hypervisor::Abs' do
 
       hosts = provision_hosts(host_hashes, resource_hosts)
 
-      hosts.length.must_equal(2)
-      hosts[0]['vmhostname'].must_equal('m2em9v7895hk7xg.delivery.puppetlabs.net')
-      hosts[1]['vmhostname'].must_equal('eb0zrfuwteq80t7.delivery.puppetlabs.net')
+      _(hosts.length).must_equal(2)
+      _(hosts[0]['vmhostname']).must_equal('m2em9v7895hk7xg.delivery.puppetlabs.net')
+      _(hosts[1]['vmhostname']).must_equal('eb0zrfuwteq80t7.delivery.puppetlabs.net')
     end
 
     it 'raises when asked to provision a host not in abs_data' do
@@ -127,7 +127,7 @@ describe 'Beaker::Hypervisor::Abs' do
       err = assert_raises(ArgumentError) do
         provision_hosts(host_hash, resource_hosts)
       end
-      err.message.must_match("Failed to provision host 'redhat7-64-1', no template of type 'redhat-7-x86_64' was provided.")
+      _(err.message).must_match("Failed to provision host 'redhat7-64-1', no template of type 'redhat-7-x86_64' was provided.")
     end
 
     it 'raises when the host is missing its template' do
@@ -145,7 +145,7 @@ describe 'Beaker::Hypervisor::Abs' do
       err = assert_raises(ArgumentError) do
         provision_hosts(host_hash, resource_hosts)
       end
-      err.message.must_match("Failed to provision host 'redhat7-64-1' because its 'template' is missing.")
+      _(err.message).must_match("Failed to provision host 'redhat7-64-1' because its 'template' is missing.")
     end
 
     it 'prefers abs_data as an ENV variable' do
@@ -171,8 +171,8 @@ describe 'Beaker::Hypervisor::Abs' do
         ENV['ABS_RESOURCE_HOSTS'] = nil
       end
 
-      hosts.length.must_equal(1)
-      hosts[0]['vmhostname'].must_equal('eb0zrfuwteq80t7.delivery.puppetlabs.net')
+      _(hosts.length).must_equal(1)
+      _(hosts[0]['vmhostname']).must_equal('eb0zrfuwteq80t7.delivery.puppetlabs.net')
     end
 
     it 'does not call set_ssh_connection_preference method if hypervisor does not responds' do

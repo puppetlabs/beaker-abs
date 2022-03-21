@@ -51,6 +51,23 @@ the environment variable ABS_SERVICE_NAME or the top level option in the hosts f
 it will take precedence over CI tests. Be careful not to run a CI test with this option. The priority can be configured via
 the environment variable ABS_SERVICE_PRIORITY or the top level option in the hosts file abs_service_priority.
 
+#### Examples
+
+Changing from default priority 1 to 3 via env var
+```
+ABS_SERVICE_PRIORITY=3 bundle exec beaker --provision --hosts=hosts.cfg --tests acceptance/tests
+```
+
+Changing the service name to look for in ~/.vmfloaty.yml via a beaker option file
+```
+$ cat options.rb
+{
+  provision: 'true',
+  abs_service_name: "FOOBAR"
+}
+$ bundle exec beaker --hosts=hosts.cfg --tests acceptance/tests --options options.rb
+```
+
 ## Development
 
 After checking out the repo, run `bundle install --path .bundle` to install dependencies. Then, run `bundle exec rake test` to run the tests.

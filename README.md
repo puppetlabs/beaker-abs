@@ -17,6 +17,12 @@ s.add_runtime_dependency 'beaker', '~>4.0'
 s.add_runtime_dependency 'beaker-abs'
 ~~~
 
+Beaker-abs changes the default beaker (core) behavior of settings the NET::SSH ssh config to 'false' which means do not respect any of the client's ssh_config.
+If beaker-abs detects that the ssh config will be false (it was not replaced in the option files, in the HOST config etc) it sets it to the value of
+SSH_CONFIG_FILE or default to 'true'. True means it will automatically check the typical locations (~/.ssh/config, /etc/ssh_config). Respecting the ssh_config is 
+useful to specify things like no strict hostkley checking, and also to support the smallstep 'step' command in CI.
+
+
 ## Usage
 
 Create a beaker host config with `hypervisor: abs`, and pass the data from the
@@ -67,6 +73,13 @@ $ cat options.rb
 }
 $ bundle exec beaker --hosts=hosts.cfg --tests acceptance/tests --options options.rb
 ```
+
+## Environment vars
+| Var      | Description | Default |
+| ----------- | ----------- | ------ |
+| ABS_SERVICE_NAME      | When using locally via vmfloaty, the --service to use       | abs |
+| ABS_SERVICE_PRIORITY  | When using locally via vmfloaty, the priority to use        | 1 |
+| SSH_CONFIG_FILE       | If beaker-abs detects the beaker default of 'false', you can specify a file location for the ssh_config. True means it will automatically check the typical locations (~/.ssh/config, /etc/ssh_config). | true |
 
 ## Development
 

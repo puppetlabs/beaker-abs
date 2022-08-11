@@ -1,0 +1,4 @@
+project=beaker-abs
+user=puppetlabs
+exclude_labels=maintenance
+since-tag=0.1.1

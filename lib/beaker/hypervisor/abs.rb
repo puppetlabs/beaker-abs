@@ -1,6 +1,5 @@
 require 'beaker'
 require 'json'
-require 'pry-byebug'
 require 'vmfloaty'
 require 'vmfloaty/conf'
 require 'vmfloaty/utils'

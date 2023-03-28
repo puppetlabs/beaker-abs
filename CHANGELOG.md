@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.0](https://github.com/puppetlabs/beaker-abs/tree/1.0.0) (2023-03-28)
+
+[Full Changelog](https://github.com/puppetlabs/beaker-abs/compare/0.11.0...1.0.0)
+
+**Breaking changes:**
+
+- \(PUP-11786\) Beaker 5 compatibility [\#32](https://github.com/puppetlabs/beaker-abs/pull/32) ([mhashizume](https://github.com/mhashizume))
+
+**Merged pull requests:**
+
+- \(RE-15111\) Add Mend Scanning [\#31](https://github.com/puppetlabs/beaker-abs/pull/31) ([yachub](https://github.com/yachub))
+- \(RE-14811\) Remove DIO as codeowners [\#30](https://github.com/puppetlabs/beaker-abs/pull/30) ([yachub](https://github.com/yachub))
+- Add RE as codeowners and Migrate to Actions [\#29](https://github.com/puppetlabs/beaker-abs/pull/29) ([yachub](https://github.com/yachub))
+
 ## [0.11.0](https://github.com/puppetlabs/beaker-abs/tree/0.11.0) (2022-08-11)
 
 [Full Changelog](https://github.com/puppetlabs/beaker-abs/compare/0.10.1...0.11.0)

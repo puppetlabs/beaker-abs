@@ -14,5 +14,5 @@ def location_for(place, fake_version = nil)
 end
 
 group :testing do
-  gem "beaker", *location_for(ENV['BEAKER_VERSION'] || '~> 4.0')
+  gem "beaker", *location_for(ENV['BEAKER_VERSION'] || '~> 5.0')
 end

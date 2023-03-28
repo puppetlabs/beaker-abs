@@ -1,37 +1,95 @@
-name: Release
+name: Tag Release & Push Gem
 
 on: workflow_dispatch
 
 jobs:
   release:
+    name: Validate Docs, Tag, and Push Gem
     runs-on: ubuntu-latest
     if: github.repository == 'puppetlabs/beaker-abs'
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Get Version
-        id: gv
-        run: |
-          echo "::set-output name=ver::$(grep VERSION lib/beaker-abs/version.rb |rev |cut -d "'" -f2 |rev)"
-      - name: Tag Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.gv.outputs.ver }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          draft: false
-          prerelease: false
-          generateReleaseNotes: true
-      - name: Install Ruby 2.7
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '2.7'
-      - name: Build gem
-        run: gem build *.gemspec
-      - name: Publish gem
-        run: |
-          mkdir -p $HOME/.gem
-          touch $HOME/.gem/credentials
-          chmod 0600 $HOME/.gem/credentials
-          printf -- "---\n:rubygems_api_key: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
-          gem push *.gem
-        env:
-          GEM_HOST_API_KEY: '${{ secrets.RUBYGEMS_AUTH_TOKEN }}'
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        clean: true
+        fetch-depth: 0
+
+    - name: Get New Version
+      id: nv
+      run: |
+        version=$(grep VERSION lib/beaker-abs/version.rb |rev |cut -d "'" -f2 |rev)
+        echo "version=$version" >> $GITHUB_OUTPUT
+        echo "Found version $version from lib/beaker-abs/version.rb"
+
+    - name: Get Current Version
+      uses: actions/github-script@v6
+      id: cv
+      with:
+        script: |
+          const { data: response } = await github.rest.repos.getLatestRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          })
+          console.log(`The latest release is ${response.tag_name}`)
+          return response.tag_name
+        result-encoding: string
+
+    - name: Generate Changelog
+      uses: docker://githubchangeloggenerator/github-changelog-generator:1.16.2
+      with:
+        args: >-
+          --future-release ${{ steps.nv.outputs.version }}
+      env:
+        CHANGELOG_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Validate Changelog
+      run : |
+        set -e
+        if output=$(git status --porcelain) && [ ! -z "$output" ]; then
+          echo "Here is the current git status:"
+          git status
+          echo
+          echo "The following changes were detected:"
+          git --no-pager diff
+          echo "Uncommitted PRs found in the changelog. Please submit a release prep PR of changes after running './release-prep'"
+          exit 1
+        fi
+
+    - name: Generate Release Notes
+      uses: docker://githubchangeloggenerator/github-changelog-generator:1.16.2
+      with:
+        args: >-
+          --since-tag ${{ steps.cv.outputs.result }}
+          --future-release ${{ steps.nv.outputs.version }}
+          --output release-notes.md
+      env:
+        CHANGELOG_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Tag Release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ steps.nv.outputs.version }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        bodyfile: release-notes.md
+        draft: false
+        prerelease: false
+
+    - name: Set up Ruby 3.2
+      uses: actions/setup-ruby@v1
+      with:
+        version: 3.2.x
+
+    - name: Build gem
+      run: gem build *.gemspec
+
+    - name: Publish gem
+      run: |
+        mkdir -p $HOME/.gem
+        touch $HOME/.gem/credentials
+        chmod 0600 $HOME/.gem/credentials
+        printf -- "---\n:rubygems_api_key: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
+        gem push *.gem
+      env:
+        GEM_HOST_API_KEY: ${{secrets.RUBYGEMS_AUTH_TOKEN}}

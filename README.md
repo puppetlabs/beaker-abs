@@ -3,15 +3,16 @@
 [![Gem Version](https://badge.fury.io/rb/beaker-abs.svg)](https://badge.fury.io/rb/beaker-abs)
 [![Testing](https://github.com/puppetlabs/beaker-abs/actions/workflows/testing.yml/badge.svg)](https://github.com/puppetlabs/beaker-abs/actions/workflows/testing.yml)
 
-- [Description](#description)
-- [Installation](#installation)
-- [Usage](#usage)
-  - [Using vmfloaty](#using-vmfloaty)
-    - [Examples](#examples)
-- [Environment vars](#environment-vars)
-- [Releasing](#releasing)
-- [Contributing](#contributing)
-- [License](#license)
+- [beaker-abs](#beaker-abs)
+  - [Description](#description)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [Using vmfloaty](#using-vmfloaty)
+      - [Examples](#examples)
+  - [Environment vars](#environment-vars)
+  - [Releasing](#releasing)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Description
 
@@ -103,7 +104,7 @@ $ bundle exec beaker --hosts=hosts.cfg --tests acceptance/tests --options option
 Open a release prep PR and run the release action:
 
 1. Bump the "version" parameter in `lib/beaker-abs/version.rb` appropriately based merged pull requests since the last release.
-2. Update the changelog by running `docker run -it --rm -e CHANGELOG_GITHUB_TOKEN -v $(pwd):/usr/local/src/your-app githubchangeloggenerator/github-changelog-generator:1.16.2 github_changelog_generator --future-release <INSERT_NEXT_VERSION>`
+2. Run `./release-prep` to update `Gemfile.lock` and `CHANGELOG.md`.
 3. Commit and push changes to a new branch, then open a pull request against `main` and be sure to add the "maintenance" label.
 4. After the pull request is approved and merged, then navigate to Actions --> Release Action --> run workflow --> Branch: main --> Run workflow.
 

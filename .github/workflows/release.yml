@@ -19,7 +19,7 @@ jobs:
     - name: Get New Version
       id: nv
       run: |
-        version=$(grep VERSION lib/beaker-abs/version.rb |rev |cut -d "'" -f2 |rev)
+        version=$(grep STRING lib/beaker-abs/version.rb |rev |cut -d "'" -f2 |rev)
         echo "version=$version" >> $GITHUB_OUTPUT
         echo "Found version $version from lib/beaker-abs/version.rb"
 

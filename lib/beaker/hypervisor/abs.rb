@@ -17,6 +17,30 @@ module Beaker
     end
   end
 
+  # This hypervisor supports two modes of provisioning via the
+  # +Beaker::Host#provision+ method or the +provision_vms+ method in this file.
+  # The first method is used in CI when already provisioned hosts are passed to this
+  # hypervisor in the form of a +resource_hash+ like:
+  #
+  # {
+  #   "hostname" => "mkbx0m6dnnntgz1.delivery.puppetlabs.net",
+  #   "type"     => "centos-7-i386",
+  #   "engine"   => "vmpooler",
+  # }
+  #
+  # And the "provision" method enumerates each host in the requested +hosts+ hash and
+  # looks up a host of the +type+ in the already provisioned +resource_hosts+ hash above.
+  #
+  # The second mode is used when running beaker from the command line with hypervisor
+  # set to 'abs' like:
+  #
+  #   bundle exec beaker-hostgenerator $PLATFORMS --hypervisor abs ... > hosts.yaml
+  #   bundle exec beaker init -h hosts.yaml -o config/aio/options.rb
+  #   bundle exec beaker provision
+  #
+  # In that case, this hypervisor will provision hosts from abs on-demand using the
+  # +provision_vms+ method.
+  #
   class Abs < Beaker::Hypervisor
     def initialize(hosts, options)
       @options = options
@@ -34,7 +58,7 @@ module Beaker
           @hosts[index] = Beaker::Host.create(host.name, host.host_hash, options)
         end
       end
-      
+
       resource_hosts = ENV['ABS_RESOURCE_HOSTS'] || @options[:abs_resource_hosts]
 
       @abs_service_name = ENV['ABS_SERVICE_NAME'] || @options[:abs_service_name] || "abs"
@@ -43,6 +67,34 @@ module Beaker
       raise ArgumentError.new("ABS_RESOURCE_HOSTS must be specified when using the Beaker::Abs hypervisor when provisioning") if resource_hosts.nil? && !options[:provision]
       resource_hosts = provision_vms(hosts).to_json if resource_hosts.nil?
       @resource_hosts = JSON.parse(resource_hosts)
+
+      if options[:provision]
+        if resource_hosts.nil?
+          raise ArgumentError.new("ABS_RESOURCE_HOSTS must be specified when using the Beaker::Abs hypervisor when provisioning")
+        end
+        resource_hosts = provision_vms(hosts).to_json
+        @resource_hosts = JSON.parse(resource_hosts)
+      else
+        @resource_hosts = {}
+      end
+
+      # if resource_hosts.nil?
+      #   if options[:provision]
+      #     resource_hosts = provision_vms(hosts).to_json
+      #   elsif @hosts.all?{ |h| h.hostname }
+      #     raise ArgumentError.new("ABS_RESOURCE_HOSTS must be specified when using the Beaker::Abs hypervisor when provisioning")
+      #   else
+      #   end
+      # end
+      # @resource_hosts = JSON.parse(resource_hosts)
+      # if options[:provision]
+      #   resource_hosts = provision_vms(hosts).to_json
+      #   @resource_hosts = JSON.parse(resource_hosts)
+      # elsif @hosts.empty?
+      #   raise ArgumentError.new("ABS_RESOURCE_HOSTS must be specified when using the Beaker::Abs hypervisor when provisioning")
+      # else
+      #   @resource_hosts = {}
+      # end
     end
 
     def connection_preference(host)
@@ -105,9 +157,26 @@ module Beaker
     end
 
     def cleanup
-      # nothing to do
+      verbose = false
+
+      # get the vmfloaty config file in home dir
+      config = Conf.read_config
+
+      hostnames = @hosts.map(&:hostname)
+      unless hostnames.empty?
+        cli = Clifloaty.new(@abs_service_name, @abs_service_priority)
+        abs_service = Service.new(cli, config)
+        abs_service.delete(verbose, hostnames).each_pair do |hostname, result|
+          if result['ok']
+            FloatyLogger.info("Deleted #{hostname}")
+          else
+            FloatyLogger.error("Failed to delete #{hostname}")
+          end
+        end
+      end
     end
 
+    # Provision on-demand instead of having already provisioned hosts pass
     def provision_vms(hosts)
 
       verbose = false

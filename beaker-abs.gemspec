@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "beaker", "~> 5.0"
+  spec.add_dependency "beaker", ">= 5.0", "< 7"
   spec.add_dependency "vmfloaty", ">= 1.0", "< 2"
   # accept more keys, for smallstep integration
   spec.add_dependency 'ed25519', ">= 1.2", "< 2.0"

@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0](https://github.com/puppetlabs/beaker-abs/tree/1.1.0) (2024-05-28)
+
+[Full Changelog](https://github.com/puppetlabs/beaker-abs/compare/1.0.0...1.1.0)
+
+**Fixed bugs:**
+
+- Fix minitest after 5.19.0 [\#36](https://github.com/puppetlabs/beaker-abs/pull/36) ([yachub](https://github.com/yachub))
+
+**Merged pull requests:**
+
+- Add support for Beaker 6 [\#41](https://github.com/puppetlabs/beaker-abs/pull/41) ([mhashizume](https://github.com/mhashizume))
+- Bump actions/setup-java from 3 to 4 [\#38](https://github.com/puppetlabs/beaker-abs/pull/38) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/github-script from 6 to 7 [\#37](https://github.com/puppetlabs/beaker-abs/pull/37) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/checkout from 3 to 4 [\#35](https://github.com/puppetlabs/beaker-abs/pull/35) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.0.0](https://github.com/puppetlabs/beaker-abs/tree/1.0.0) (2023-03-28)
 
 [Full Changelog](https://github.com/puppetlabs/beaker-abs/compare/0.11.0...1.0.0)

@@ -1,8 +1,42 @@
+# This workflow was originally pointing to a shared workflow in the puppetlabs/release-engineering-repo-standards repository. 
+# However, it has been copied here since the shared workflow is no longer publicly accessible.
+#
+# on: pull_request
+# jobs:
+#   ensure_label:
+#     uses: puppetlabs/release-engineering-repo-standards/.github/workflows/ensure_label.yml@v1
+#     secrets: inherit
+
 name: Ensure label
 
-on: pull_request
+on: 
+  pull_request:
 
 jobs:
-  ensure_label:
-    uses: puppetlabs/release-engineering-repo-standards/.github/workflows/ensure_label.yml@v1
-    secrets: inherit
+  label_exists:
+    name: Label Must Exist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for Labels
+        uses: actions/github-script@v6
+        with:
+          script: |
+            async function getPullRequest() {
+              // Get current pull request labels
+              const { data: { labels } } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.number,
+              });
+
+              // Log found label names
+              for (const label of labels) {
+                core.info(`Found label named '${label.name}' on pull request number ${context.payload.number}`);
+              };
+
+              // Fail workflow if no labels exist
+              labelsExist = (labels.length === 0) ? false : true;
+              if (!labelsExist) core.setFailed(`Please ensure that a label exists on pull request number ${context.payload.number}`);
+            }
+
+            getPullRequest();

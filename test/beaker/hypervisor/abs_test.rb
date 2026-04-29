@@ -16,6 +16,37 @@ describe 'Beaker::Hypervisor::Abs' do
     hosts
   end
 
+  describe 'initialize' do
+    it 'pending: does not raise when neither ABS_RESOURCE_HOSTS nor provision: true is set' do
+      assert_raises(ArgumentError) do
+        Beaker::Abs.new([], {:provision => false})
+      end
+    end
+
+    it 'pending: initializes resource_hosts to an empty array when neither is provided' do
+      assert_raises(ArgumentError) do
+        Beaker::Abs.new([], {:provision => false})
+      end
+    end
+
+    it 'parses ABS_RESOURCE_HOSTS from the environment' do
+      resource_hosts = [{'hostname' => 'foo.example.com', 'type' => 'centos-7', 'engine' => 'vmpooler'}]
+      ENV['ABS_RESOURCE_HOSTS'] = resource_hosts.to_json
+      begin
+        abs = Beaker::Abs.new([], {})
+        _(abs.instance_variable_get(:@resource_hosts)).must_equal resource_hosts
+      ensure
+        ENV['ABS_RESOURCE_HOSTS'] = nil
+      end
+    end
+
+    it 'parses abs_resource_hosts from options' do
+      resource_hosts = [{'hostname' => 'bar.example.com', 'type' => 'el-7', 'engine' => 'nspooler'}]
+      abs = Beaker::Abs.new([], {:abs_resource_hosts => resource_hosts.to_json})
+      _(abs.instance_variable_get(:@resource_hosts)).must_equal resource_hosts
+    end
+  end
+
   describe 'when ABS_RESOURCE_HOSTS is not ready' do
     it '#provision_vms works properly' do
 
@@ -173,6 +204,13 @@ describe 'Beaker::Hypervisor::Abs' do
 
       _(hosts.length).must_equal(1)
       _(hosts[0]['vmhostname']).must_equal('eb0zrfuwteq80t7.delivery.puppetlabs.net')
+    end
+
+    it 'raises in provision when there are no resource hosts and provision: false' do
+      host = Beaker::Host.create('myhost', {'hypervisor' => 'abs', 'platform' => 'el-7-x86_64', 'template' => 'centos-7'}, {})
+      assert_raises(ArgumentError) do
+        Beaker::Abs.new([host], {:provision => false})
+      end
     end
 
     it 'does not call set_ssh_connection_preference method if hypervisor does not responds' do

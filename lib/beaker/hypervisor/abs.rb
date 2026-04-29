@@ -39,9 +39,7 @@ module Beaker
       @abs_service_name = ENV['ABS_SERVICE_NAME'] || @options[:abs_service_name] || "abs"
       @abs_service_priority = ENV['ABS_SERVICE_PRIORITY'] || @options[:abs_service_priority] || "1"
 
-      raise ArgumentError.new("ABS_RESOURCE_HOSTS must be specified when using the Beaker::Abs hypervisor when provisioning") if resource_hosts.nil? && !options[:provision]
-      resource_hosts = provision_vms(hosts).to_json if resource_hosts.nil?
-      @resource_hosts = JSON.parse(resource_hosts)
+      @resource_hosts = resource_hosts ? JSON.parse(resource_hosts) : []
     end
 
     def connection_preference(host)
@@ -65,6 +63,11 @@ module Beaker
     end
 
     def provision
+      if @resource_hosts.empty? && !@hosts.empty?
+        raise ArgumentError, "ABS_RESOURCE_HOSTS must be specified when using the Beaker::Abs hypervisor" unless @options[:provision]
+        @resource_hosts = JSON.parse(provision_vms(@hosts).to_json)
+      end
+
       type2hosts = {}
 
       # Each resource_host is of the form:
@@ -104,7 +107,22 @@ module Beaker
     end
 
     def cleanup
-      # nothing to do
+      return if ENV['ABS_RESOURCE_HOSTS'] || @options[:abs_resource_hosts]
+
+      hostnames = @hosts.map(&:hostname)
+      return if hostnames.empty?
+
+      verbose = false
+      config = Conf.read_config
+      cli = Clifloaty.new(@abs_service_name, @abs_service_priority)
+      abs_service = Service.new(cli, config)
+      abs_service.delete(verbose, hostnames).each_pair do |hostname, result|
+        if result['ok']
+          @logger.info("Destroyed #{hostname}")
+        else
+          @logger.warn("Failed to destroy #{hostname}")
+        end
+      end
     end
 
     def provision_vms(hosts)

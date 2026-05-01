@@ -324,6 +324,35 @@ describe 'Beaker::Hypervisor::Abs' do
       end
       _(abs.instance_variable_get(:@logger).warns.first).must_match(/foo\.example\.com/)
     end
+
+    it 'deletes by vmhostname not beaker host name' do
+      host = Beaker::Host.create('redhat7-64-1', {
+        'hypervisor' => 'abs',
+        'platform'   => 'el-7-x86_64',
+        'template'   => 'centos-7'
+      }, {})
+      host['vmhostname'] = 'abs-hostname.delivery.puppetlabs.net'
+      abs = make_abs([host])
+
+      deleted_hostnames = []
+      service_stub = ->(*) {
+        Object.new.tap { |s|
+          s.define_singleton_method(:delete) { |_, names|
+            deleted_hostnames.concat(names)
+            names.map { |n| [n, {'ok' => true}] }.to_h
+          }
+        }
+      }
+
+      Conf.stub(:read_config, {}) do
+        Service.stub(:new, service_stub) do
+          abs.cleanup
+        end
+      end
+
+      assert_includes deleted_hostnames, 'abs-hostname.delivery.puppetlabs.net'
+      refute_includes deleted_hostnames, 'redhat7-64-1'
+    end
   end
 
 end

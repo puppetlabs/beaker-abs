@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/puppetlabs/beaker-abs/tree/1.2.0) (2026-07-30)
+
+[Full Changelog](https://github.com/puppetlabs/beaker-abs/compare/1.1.0...1.2.0)
+
+**Fixed bugs:**
+
+- \(PA-8450\) Fix beaker destroy when ABS\_RESOURCE\_HOSTS is unset [\#49](https://github.com/puppetlabs/beaker-abs/pull/49) ([joshcooper](https://github.com/joshcooper))
+
+**Merged pull requests:**
+
+- \(PA-9008\) Allow beaker 7 [\#51](https://github.com/puppetlabs/beaker-abs/pull/51) ([shubhamshinde360](https://github.com/shubhamshinde360))
+
 ## [1.1.0](https://github.com/puppetlabs/beaker-abs/tree/1.1.0) (2024-05-28)
 
 [Full Changelog](https://github.com/puppetlabs/beaker-abs/compare/1.0.0...1.1.0)
@@ -105,7 +117,7 @@
 
 **Merged pull requests:**
 
-- \(QENG-6081\) Remove beaker dependency [\#10](https://github.com/puppetlabs/beaker-abs/pull/10) ([smcelmurry](https://github.com/smcelmurry))
+- \(QENG-6081\) Remove beaker dependency [\#10](https://github.com/puppetlabs/beaker-abs/pull/10) ([junebug-spencer](https://github.com/junebug-spencer))
 
 ## [0.3.0](https://github.com/puppetlabs/beaker-abs/tree/0.3.0) (2017-08-14)
 

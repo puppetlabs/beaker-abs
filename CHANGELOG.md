@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.2.0](https://github.com/puppetlabs/beaker-abs/tree/1.2.0) (2026-07-30)
+## [1.2.0](https://github.com/puppetlabs/beaker-abs/tree/1.2.0) (2026-07-31)
 
 [Full Changelog](https://github.com/puppetlabs/beaker-abs/compare/1.1.0...1.2.0)
 
@@ -10,6 +10,7 @@
 
 **Merged pull requests:**
 
+- Release prep 1.2.0 [\#52](https://github.com/puppetlabs/beaker-abs/pull/52) ([shubhamshinde360](https://github.com/shubhamshinde360))
 - \(PA-9008\) Allow beaker 7 [\#51](https://github.com/puppetlabs/beaker-abs/pull/51) ([shubhamshinde360](https://github.com/shubhamshinde360))
 
 ## [1.1.0](https://github.com/puppetlabs/beaker-abs/tree/1.1.0) (2024-05-28)
